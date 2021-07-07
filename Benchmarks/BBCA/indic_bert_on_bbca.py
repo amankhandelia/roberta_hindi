@@ -25,7 +25,7 @@ def compute_metrics(eval_pred, metric):
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
-def tokenize_function(examples, tokenizer):
+def tokenize_function(examples, tokenizer, map_keys):
     tz = tokenizer(examples["text"], padding="max_length", truncation=True, max_length=128)
     tz["label"] = [map_keys[x] for x in examples["label"]]
     return tz
@@ -39,8 +39,8 @@ def evaluate_bbca(model_name_or_path = 'ai4bharat/indic-bert'):
     num_labels = len(raw_datasets['train'].unique('label'))
     map_keys = {v:k for k, v in enumerate(raw_datasets['train'].unique('label'))}
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast = False)
-    tokenize_function = partial(tokenize_function, tokenizer=tokenizer)
-    tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
+    partial_tokenize_function = partial(tokenize_function, tokenizer=tokenizer, map_keys=map_keys)
+    tokenized_datasets = raw_datasets.map(partial_tokenize_function, batched=True)
     full_train_dataset = tokenized_datasets["train"]
     full_eval_dataset = tokenized_datasets["test"]
 
@@ -50,10 +50,10 @@ def evaluate_bbca(model_name_or_path = 'ai4bharat/indic-bert'):
 
     # getting the metric for performance computation ready
     metric = load_metric('indic_glue', 'bbca')
-    compute_metrics = partial(compute_metrics, metric=metric)
+    partial_compute_metrics = partial(compute_metrics, metric=metric)
     
     trainer = Trainer(
-        model=model, args=training_args, train_dataset=full_train_dataset, eval_dataset=full_eval_dataset, compute_metrics=compute_metrics
+        model=model, args=training_args, train_dataset=full_train_dataset, eval_dataset=full_eval_dataset, compute_metrics=partial_compute_metrics
     )
     
     # train model
