@@ -7,67 +7,57 @@ Original file is located at
     https://colab.research.google.com/drive/19AO-8jfgTpU0cOLrs_9shNuNKAu4riXM
 """
 
-# Commented out IPython magic to ensure Python compatibility.
-# %load_ext autoreload
-# %autoreload 2
-
-!pip install transformers datasets flax jax jaxlib
 
 from datasets import load_dataset
-#model_name_or_path = 'mrm8488/HindiBERTa'
-#model_name_or_path = 'flax-community/roberta-pretraining-hindi'
-model_name_or_path = 'ai4bharat/indic-bert'
+from datasets import load_metric
 
-raw_datasets = load_dataset('indic_glue', 'bbca.hi')
-
-num_labels = len(raw_datasets['train'].unique('label'))
-num_labels
-
-map_keys = {v:k for k, v in enumerate(raw_datasets['train'].unique('label'))}
-map_keys
-
-!pip install sentencepiece
-# install and restart the kernel
-
+from transformers import Trainer
 from transformers import AutoTokenizer
+from transformers import AutoModelForSequenceClassification
+from transformers import TrainingArguments
 
-tokenizer = AutoTokenizer.from_pretrained(model_name_or_path,use_fast = False)
+import numpy as np
+
+from functools import partial
+
+def compute_metrics(eval_pred, metric):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
 
 def tokenize_function(examples):
     tz = tokenizer(examples["text"], padding="max_length", truncation=True, max_length=128)
     tz["label"] = [map_keys[x] for x in examples["label"]]
     return tz
 
-tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
+#model_name_or_path = 'mrm8488/HindiBERTa'
+#model_name_or_path = 'flax-community/roberta-pretraining-hindi'
+def evaluate_bbca(model_name_or_path = 'ai4bharat/indic-bert'):
+    
+    # data prep
+    raw_datasets = load_dataset('indic_glue', 'bbca.hi')
+    num_labels = len(raw_datasets['train'].unique('label'))
+    map_keys = {v:k for k, v in enumerate(raw_datasets['train'].unique('label'))}
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast = False)
+    tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
+    full_train_dataset = tokenized_datasets["train"]
+    full_eval_dataset = tokenized_datasets["test"]
 
-full_train_dataset = tokenized_datasets["train"]
-full_eval_dataset = tokenized_datasets["test"]
+    # model intilization from pretrained weights
+    model = AutoModelForSequenceClassification.from_pretrained(model_name_or_path, num_labels=num_labels)
+    training_args = TrainingArguments("test_trainer", evaluation_strategy="epoch")
 
-from transformers import AutoModelForSequenceClassification
-
-model = AutoModelForSequenceClassification.from_pretrained(model_name_or_path, num_labels=num_labels)
-
-from transformers import TrainingArguments
-
-training_args = TrainingArguments("test_trainer", evaluation_strategy="epoch")
-
-from transformers import Trainer
-
-import numpy as np
-from datasets import load_metric
-
-# metric = load_metric("accuracy")
-metric = load_metric('indic_glue', 'bbca')
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
-
-trainer = Trainer(
-    model=model, args=training_args, train_dataset=full_train_dataset, eval_dataset=full_eval_dataset, compute_metrics=compute_metrics
-)
-
-trainer.train()
-
-trainer.evaluate()
+    # getting the metric for performance computation ready
+    metric = load_metric('indic_glue', 'bbca')
+    compute_metrics = partial(compute_metrics, metric=metric)
+    
+    trainer = Trainer(
+        model=model, args=training_args, train_dataset=full_train_dataset, eval_dataset=full_eval_dataset, compute_metrics=compute_metrics
+    )
+    
+    # train model
+    trainer.train()
+    
+    # evaluate model
+    trainer.evaluate()
 
