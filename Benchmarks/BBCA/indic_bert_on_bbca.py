@@ -61,3 +61,5 @@ def evaluate_bbca(model_name_or_path = 'ai4bharat/indic-bert'):
     # evaluate model
     trainer.evaluate()
 
+if __name__ == "__main__":
+    evaluate_bbca()
