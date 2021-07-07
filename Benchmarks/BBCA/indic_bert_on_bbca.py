@@ -25,7 +25,7 @@ def compute_metrics(eval_pred, metric):
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
-def tokenize_function(examples):
+def tokenize_function(examples, tokenizer):
     tz = tokenizer(examples["text"], padding="max_length", truncation=True, max_length=128)
     tz["label"] = [map_keys[x] for x in examples["label"]]
     return tz
@@ -39,6 +39,7 @@ def evaluate_bbca(model_name_or_path = 'ai4bharat/indic-bert'):
     num_labels = len(raw_datasets['train'].unique('label'))
     map_keys = {v:k for k, v in enumerate(raw_datasets['train'].unique('label'))}
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast = False)
+    tokenize_function = partial(tokenize_function, tokenizer=tokenizer)
     tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
     full_train_dataset = tokenized_datasets["train"]
     full_eval_dataset = tokenized_datasets["test"]
