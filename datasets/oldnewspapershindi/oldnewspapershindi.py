@@ -12,24 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""mathurinache/samanantar"""
+"""crazydiv/oldnewspapershindi"""
 import ast
 import csv
 import datasets
-# Some readme files on modelhub are large in size
 csv.field_size_limit(100000000)
 _CITATION = """\
 """
 _DESCRIPTION = """\
-mathurinache/samanantar
+crazydiv/oldnewspapershindi
 """
-_HOMEPAGE = "https://www.kaggle.com/mathurinache/samanantar"
+_HOMEPAGE = "https://www.kaggle.com/crazydiv/oldnewspapershindi"
 _LICENSE = ""
 
-_TRAIN_URL = "train.hi"
+_TRAIN_URL = "train_hi.csv"
 
-class Samanantar(datasets.GeneratorBasedBuilder):
-    """mathurinache/samanantar"""
+class OldNewspapersHindi(datasets.GeneratorBasedBuilder):
+    """crazydiv/oldnewspapershindi"""
     VERSION = datasets.Version("1.0.0")
     def _info(self):
         return datasets.DatasetInfo(
@@ -37,6 +36,7 @@ class Samanantar(datasets.GeneratorBasedBuilder):
             features=datasets.Features(
                 {
                     "text": datasets.Value("string"),
+                    "source": datasets.Value("string"),
                 }
             ),
             homepage=_HOMEPAGE,
@@ -56,6 +56,9 @@ class Samanantar(datasets.GeneratorBasedBuilder):
         with open(filepath, encoding="utf-8") as f:
             reader = csv.reader(f)
             for id_, row in enumerate(reader):
+                if id_ == 0:
+                    continue
                 yield id_, {
                     "text": row[0],
+                    "source": row[1],
                 }

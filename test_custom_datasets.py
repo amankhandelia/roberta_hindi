@@ -43,7 +43,7 @@ def preprocess_indic_glue_wiki_ner(dataset):
     return dataset
 
 
-def concatenate_hindi_text_short_summarization_corpus_row(example, cols):
+def concatenate_samanantar_row(example, cols):
     text = ""
     for col in cols:
         if example[col]:
@@ -55,7 +55,24 @@ def concatenate_hindi_text_short_summarization_corpus_row(example, cols):
 def preprocess_samanantar(dataset):
     cols = DATASET_DICT["samanantar"]["cols_to_concatenate"]
     remove_cols = DATASET_DICT["samanantar"]["cols_to_remove"]
-    dataset = dataset.map(lambda x: concatenate_hindi_text_short_summarization_corpus_row(x, cols), 
+    dataset = dataset.map(lambda x: concatenate_samanantar_row(x, cols), 
+        remove_columns=remove_cols)
+    return dataset
+
+
+def concatenate_oldnewspapershindi_row(example, cols):
+    text = ""
+    for col in cols:
+        if example[col]:
+            text += example[col]
+    example["text"] = text
+    return example
+
+
+def preprocess_oldnewspapershindi(dataset):
+    cols = DATASET_DICT["oldnewspapershindi"]["cols_to_concatenate"]
+    remove_cols = DATASET_DICT["oldnewspapershindi"]["cols_to_remove"]
+    dataset = dataset.map(lambda x: concatenate_oldnewspapershindi_row(x, cols), 
         remove_columns=remove_cols)
     return dataset
 
@@ -83,16 +100,25 @@ DATASET_DICT = {
     "samanantar": {
         "is_custom": True,
         "path": base_path + "/datasets/samanantar",
-        "split_names": ["train", "test"],
-        "cols_to_concatenate": ["headline", "article"],
-        "cols_to_remove": ["headline", "article"],
+        "split_names": ["train"],
+        "cols_to_concatenate": ["text"],
+        "cols_to_remove": [],
         "configuration": None,
         "preprocess_fn": preprocess_samanantar
+    },
+    "oldnewspapershindi": {
+        "is_custom": True,
+        "path": base_path + "/datasets/oldnewspapershindi",
+        "split_names": ["train"],
+        "cols_to_concatenate": ["text"],
+        "cols_to_remove": ["source"],
+        "configuration": None,
+        "preprocess_fn": preprocess_oldnewspapershindi
     },
 }
 
 
-def load_and_concatenate(datasets_list):
+def load_and_concatenate(datasets_list, print_test_row=False):
     processed_datasets = []
     for dataset_id in datasets_list:
         if dataset_id not in DATASET_DICT:
@@ -109,18 +135,22 @@ def load_and_concatenate(datasets_list):
                     DATASET_DICT[dataset_id]["configuration"], split=split_name)
             processed_dataset = DATASET_DICT[dataset_id]["preprocess_fn"](dataset)
             processed_datasets.append(processed_dataset)
-    # print(processed_datasets)
+    if print_test_row:
+        print(processed_datasets)
+        for d in processed_datasets:
+            print(d[0])
     concatenated_dataset = concatenate_datasets(processed_datasets)
     return concatenated_dataset
 
 datasets_list = [
     "hindi-text-short-summarization-corpus",
     "indic-glue",
-    # "samanantar" Dataset is same as hindi-text-short-summarization-corpus
+    "samanantar",
+    "oldnewspapershindi"
 ]
 
 
-dataset = load_and_concatenate(datasets_list)
+dataset = load_and_concatenate(datasets_list, print_test_row=False)
 shuffle_dataset = dataset.shuffle(seed=42)
 print("Total rows:", len(shuffle_dataset))
 print("Sample: ", shuffle_dataset[42]["text"])
