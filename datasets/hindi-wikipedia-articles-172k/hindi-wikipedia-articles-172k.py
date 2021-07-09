@@ -57,7 +57,7 @@ class HindiWikipediaArticles172k(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath):
         """Yields examples."""
-        for id_, filename in os.listdir(filepath):
+        for id_, filename in enumerate(os.listdir(filepath)):
             if ".txt" not in filename:
                 continue
 
