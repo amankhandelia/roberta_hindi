@@ -6,9 +6,12 @@ Step2: provide full path to dataset scripts below (/home/<user>/./...), relative
 
 import os
 import sys
+import regex
 from datasets import load_dataset, concatenate_datasets
 # base_path = os.path.expanduser("~")
 base_path = os.getcwd()
+NUM_PROC = 1
+DATASET_SAVE_PATH = "/home/rtx/work/dk/hf/vo"
 
 def concatenate_hindi_text_short_summarization_corpus_row(example, cols):
     text = ""
@@ -22,7 +25,7 @@ def preprocess_hindi_text_short_summarization_corpus(dataset):
     cols = DATASET_DICT["hindi-text-short-summarization-corpus"]["cols_to_concatenate"]
     remove_cols = DATASET_DICT["hindi-text-short-summarization-corpus"]["cols_to_remove"]
     dataset = dataset.map(lambda x: concatenate_hindi_text_short_summarization_corpus_row(x, cols), 
-        remove_columns=remove_cols)
+        remove_columns=remove_cols, num_proc=NUM_PROC)
     return dataset
 
 def concatenate_hindi_text_short_and_large_summarization_corpus(example,cols):
@@ -38,7 +41,7 @@ def preprocess_hindi_text_short_and_large_summarization_corpus(dataset):
     cols = DATASET_DICT["hindi-text-short-and-large-summarization-corpus"]["cols_to_concatenate"]
     remove_cols = DATASET_DICT["hindi-text-short-and-large-summarization-corpus"]["cols_to_remove"]
     dataset = dataset.map(lambda x: concatenate_hindi_text_short_and_large_summarization_corpus(x,cols),
-        remove_columns=remove_cols)
+        remove_columns=remove_cols, num_proc=NUM_PROC)
 
     return dataset
 
@@ -53,7 +56,7 @@ def preprocess_indic_glue_wiki_ner(dataset):
     col = DATASET_DICT["indic-glue"]["cols_to_concatenate"][0]
     remove_cols = DATASET_DICT["indic-glue"]["cols_to_remove"]
     dataset = dataset.map(lambda x: concatenate_indic_glue_wiki_ner_row(x, col), 
-        remove_columns=remove_cols)
+        remove_columns=remove_cols, num_proc=NUM_PROC)
     return dataset
 
 
@@ -70,7 +73,7 @@ def preprocess_samanantar(dataset):
     cols = DATASET_DICT["samanantar"]["cols_to_concatenate"]
     remove_cols = DATASET_DICT["samanantar"]["cols_to_remove"]
     dataset = dataset.map(lambda x: concatenate_samanantar_row(x, cols), 
-        remove_columns=remove_cols)
+        remove_columns=remove_cols, num_proc=NUM_PROC)
     return dataset
 
 
@@ -87,7 +90,7 @@ def preprocess_oldnewspapershindi(dataset):
     cols = DATASET_DICT["oldnewspapershindi"]["cols_to_concatenate"]
     remove_cols = DATASET_DICT["oldnewspapershindi"]["cols_to_remove"]
     dataset = dataset.map(lambda x: concatenate_oldnewspapershindi_row(x, cols), 
-        remove_columns=remove_cols)
+        remove_columns=remove_cols, num_proc=NUM_PROC)
     return dataset
 
 
@@ -107,6 +110,10 @@ def preprocess_hindi_wiki_articles_172k(dataset):
         remove_columns=remove_cols)
     return dataset
 
+
+def replace_non_devanagiri(example):
+    example["text"] = regex.sub(r'\P{Devanagari}+', ' ', example["text"])
+    return example
 
 # NOTE: Adjust these paths to reflect full paths appropriately
 DATASET_DICT = {
@@ -199,7 +206,12 @@ datasets_list = [
     "hindi-wikipedia-articles-172k",
 ]
 
-dataset = load_and_concatenate(datasets_list, print_test_row=False)
+dataset = load_and_concatenate(datasets_list, print_test_row=True)
 shuffle_dataset = dataset.shuffle(seed=42)
+
+print("Removing non Devanagari characters")
+shuffle_dataset.map(replace_non_devanagiri) #, num_proc=os.cpu_count() - 1)
+
+shuffle_dataset.save_to_disk(DATASET_SAVE_PATH)
 print("Total rows:", len(shuffle_dataset))
 print("Sample: ", shuffle_dataset[42]["text"])
