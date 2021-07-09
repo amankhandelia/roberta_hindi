@@ -10,7 +10,6 @@ from datasets import load_dataset, concatenate_datasets
 # base_path = os.path.expanduser("~")
 base_path = os.getcwd()
 
-
 def concatenate_hindi_text_short_summarization_corpus_row(example, cols):
     text = ""
     for col in cols:
@@ -19,7 +18,6 @@ def concatenate_hindi_text_short_summarization_corpus_row(example, cols):
     example["text"] = text
     return example
 
-
 def preprocess_hindi_text_short_summarization_corpus(dataset):
     cols = DATASET_DICT["hindi-text-short-summarization-corpus"]["cols_to_concatenate"]
     remove_cols = DATASET_DICT["hindi-text-short-summarization-corpus"]["cols_to_remove"]
@@ -27,6 +25,22 @@ def preprocess_hindi_text_short_summarization_corpus(dataset):
         remove_columns=remove_cols)
     return dataset
 
+def concatenate_hindi_text_short_and_large_summarization_corpus(example,cols):
+    text = ""
+    for col in cols:
+        if example[col]:
+            text += example[col]
+    example["text"] = text
+    return example
+
+def preprocess_hindi_text_short_and_large_summarization_corpus(dataset):
+                        
+    cols = DATASET_DICT["hindi-text-short-and-large-summarization-corpus"]["cols_to_concatenate"]
+    remove_cols = DATASET_DICT["hindi-text-short-and-large-summarization-corpus"]["cols_to_remove"]
+    dataset = dataset.map(lambda x: concatenate_hindi_text_short_and_large_summarization_corpus(x,cols),
+        remove_columns=remove_cols)
+
+    return dataset
 
 def concatenate_indic_glue_wiki_ner_row(example, col):
     text = " ".join(example[col])
@@ -88,6 +102,17 @@ DATASET_DICT = {
         "configuration": None,
         "preprocess_fn": preprocess_hindi_text_short_summarization_corpus
     },
+    
+    "hindi-text-short-and-large-summarization-corpus": {
+        "is_custom": True,
+        "path": base_path + "/datasets/hindi-text-short-and-large-summarization-corpus",
+        "split_names": ["train", "test"],
+        "cols_to_concatenate": ["headline", "article"],
+        "cols_to_remove": ["headline", "article","summary"],
+        "configuration": None,
+        "preprocess_fn": preprocess_hindi_text_short_and_large_summarization_corpus
+    },
+    
     "indic-glue": {
         "is_custom": True,
         "path": base_path + "/datasets/indic-glue",
@@ -97,6 +122,7 @@ DATASET_DICT = {
         "cols_to_remove": ["tokens", "ner_tags", "additional_info"],
         "preprocess_fn": preprocess_indic_glue_wiki_ner
     },
+
     "samanantar": {
         "is_custom": True,
         "path": base_path + "/datasets/samanantar",
@@ -116,7 +142,6 @@ DATASET_DICT = {
         "preprocess_fn": preprocess_oldnewspapershindi
     },
 }
-
 
 def load_and_concatenate(datasets_list, print_test_row=False):
     processed_datasets = []
@@ -143,12 +168,12 @@ def load_and_concatenate(datasets_list, print_test_row=False):
     return concatenated_dataset
 
 datasets_list = [
-    "hindi-text-short-summarization-corpus",
-    "indic-glue",
-    "samanantar",
-    "oldnewspapershindi"
+"hindi-text-short-summarization-corpus",
+"hindi-text-short-and-large-summarization-corpus",
+"indic-glue",
+"samanantar",
+"oldnewspapershindi"
 ]
-
 
 dataset = load_and_concatenate(datasets_list, print_test_row=False)
 shuffle_dataset = dataset.shuffle(seed=42)
