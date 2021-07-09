@@ -11,7 +11,7 @@ from datasets import load_dataset, concatenate_datasets
 # base_path = os.path.expanduser("~")
 base_path = os.getcwd()
 NUM_PROC = 1
-DATASET_SAVE_PATH = "/home/rtx/work/dk/hf/vo"
+DATASET_SAVE_PATH = ""
 
 def concatenate_hindi_text_short_summarization_corpus_row(example, cols):
     text = ""
@@ -94,6 +94,10 @@ def preprocess_oldnewspapershindi(dataset):
     return dataset
 
 
+def preprocess_oscar(dataset):
+    dataset = dataset.remove_columns(DATASET_DICT["oscar"]["cols_to_remove"])
+    return dataset
+
 def replace_non_devanagiri(example):
     example["text"] = regex.sub(r'\P{Devanagari}+', ' ', example["text"])
     return example
@@ -148,6 +152,15 @@ DATASET_DICT = {
         "configuration": None,
         "preprocess_fn": preprocess_oldnewspapershindi
     },
+    "oscar": {
+        "is_custom": False,
+        "path": "oscar",
+        "split_names": ["train"],
+        "cols_to_concatenate": ["text"],
+        "cols_to_remove": ["id"],
+        "configuration": "unshuffled_deduplicated_hi",
+        "preprocess_fn": preprocess_oscar
+    },
 }
 
 def load_and_concatenate(datasets_list, print_test_row=False):
@@ -158,13 +171,8 @@ def load_and_concatenate(datasets_list, print_test_row=False):
             sys.exit(0)
 
         for split_name in DATASET_DICT[dataset_id]["split_names"]:
-
-            if not DATASET_DICT[dataset_id]["is_custom"]:
-                # Load dataset with name directly
-                pass
-            else:
-                dataset = load_dataset(DATASET_DICT[dataset_id]["path"],
-                    DATASET_DICT[dataset_id]["configuration"], split=split_name)
+            dataset = load_dataset(DATASET_DICT[dataset_id]["path"],
+                DATASET_DICT[dataset_id]["configuration"], split=split_name)
             processed_dataset = DATASET_DICT[dataset_id]["preprocess_fn"](dataset)
             processed_datasets.append(processed_dataset)
     if print_test_row:
@@ -179,14 +187,15 @@ datasets_list = [
 "hindi-text-short-and-large-summarization-corpus",
 "indic-glue",
 "samanantar",
-"oldnewspapershindi"
+"oldnewspapershindi",
+"oscar"
 ]
 
 dataset = load_and_concatenate(datasets_list, print_test_row=True)
 shuffle_dataset = dataset.shuffle(seed=42)
 
 print("Removing non Devanagari characters")
-shuffle_dataset.map(replace_non_devanagiri) #, num_proc=os.cpu_count() - 1)
+shuffle_dataset = shuffle_dataset.map(replace_non_devanagiri) #, num_proc=os.cpu_count() - 1)
 
 shuffle_dataset.save_to_disk(DATASET_SAVE_PATH)
 print("Total rows:", len(shuffle_dataset))
