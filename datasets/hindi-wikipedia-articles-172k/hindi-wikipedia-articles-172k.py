@@ -37,7 +37,7 @@ class HindiWikipediaArticles172k(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "id": datasets.Value("int32"),
+                    "id": datasets.Value("string"),
                     "text": datasets.Value("string"),
                 }
             ),
