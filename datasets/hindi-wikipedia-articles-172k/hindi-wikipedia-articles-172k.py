@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""disisbig/hindi-wikipedia-articles-172k"""
+"""prateekagrawal1405/hindi-wikipedia-articles-172k-csv"""
 import ast
 import csv
 import os
@@ -22,22 +22,22 @@ csv.field_size_limit(100000000)
 _CITATION = """\
 """
 _DESCRIPTION = """\
-disisbig/hindi-wikipedia-articles-172k
+prateekagrawal1405/hindi-wikipedia-articles-172k-csv
 """
-_HOMEPAGE = "https://www.kaggle.com/disisbig/hindi-wikipedia-articles-172k"
+_HOMEPAGE = "https://www.kaggle.com/prateekagrawal1405/hindi-wikipedia-articles-172k-csv"
 _LICENSE = ""
 
-_TRAIN_URL = "train/train"
-_TEST_URL = "valid/valid"
+_TRAIN_URL = "hindi_wikipedia_articles_172k.csv"
 
 class HindiWikipediaArticles172k(datasets.GeneratorBasedBuilder):
-    """disisbig/hindi-wikipedia-articles-172k"""
+    """prateekagrawal1405/hindi-wikipedia-articles-172k-csv"""
     VERSION = datasets.Version("1.0.0")
     def _info(self):
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=datasets.Features(
                 {
+                    "id": datasets.Value("int32"),
                     "text": datasets.Value("string"),
                 }
             ),
@@ -49,19 +49,18 @@ class HindiWikipediaArticles172k(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
         train_path = dl_manager.download_and_extract(_TRAIN_URL)
-        test_path = dl_manager.download_and_extract(_TEST_URL)
         return [
             datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": train_path}),
-            datasets.SplitGenerator(name=datasets.Split.TEST, gen_kwargs={"filepath": test_path}),
         ]
 
     def _generate_examples(self, filepath):
         """Yields examples."""
-        for id_, filename in enumerate(os.listdir(filepath)):
-            if ".txt" not in filename:
-                continue
-
-            with open(filename, encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
+            reader = csv.reader(f)
+            for id_, row in enumerate(reader):
+                if id_ == 0:
+                    continue
                 yield id_, {
-                    "text": f.readlines(),
+                    "id": row[0],
+                    "text": row[1],
                 }

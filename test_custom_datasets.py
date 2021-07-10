@@ -130,7 +130,6 @@ DATASET_DICT = {
         "configuration": None,
         "preprocess_fn": preprocess_hindi_text_short_summarization_corpus
     },
-    
     "hindi-text-short-and-large-summarization-corpus": {
         "is_custom": True,
         "path": base_path + "/datasets/hindi-text-short-and-large-summarization-corpus",
@@ -140,7 +139,6 @@ DATASET_DICT = {
         "configuration": None,
         "preprocess_fn": preprocess_hindi_text_short_and_large_summarization_corpus
     },
-    
     "indic-glue": {
         "is_custom": True,
         "path": base_path + "/datasets/indic-glue",
@@ -150,7 +148,6 @@ DATASET_DICT = {
         "cols_to_remove": ["tokens", "ner_tags", "additional_info"],
         "preprocess_fn": preprocess_indic_glue_wiki_ner
     },
-
     "samanantar": {
         "is_custom": True,
         "path": base_path + "/datasets/samanantar",
@@ -178,6 +175,15 @@ DATASET_DICT = {
         "configuration": "unshuffled_deduplicated_hi",
         "preprocess_fn": preprocess_oscar
     },
+    "hindi-wikipedia-articles-172k": {
+        "is_custom": True,
+        "path": base_path + "/datasets/hindi-wikipedia-articles-172k",
+        "split_names": ["train"],
+        "cols_to_concatenate": ["text"],
+        "cols_to_remove": ["id", "text"],
+        "configuration": None,
+        "preprocess_fn": preprocess_hindi_wiki_articles_172k
+    },
 }
 
 def load_and_concatenate(datasets_list, print_test_row=False):
@@ -200,12 +206,13 @@ def load_and_concatenate(datasets_list, print_test_row=False):
     return concatenated_dataset
 
 datasets_list = [
-"hindi-text-short-summarization-corpus",
-"hindi-text-short-and-large-summarization-corpus",
-"indic-glue",
-"samanantar",
-"oldnewspapershindi",
-"oscar"
+    "hindi-text-short-summarization-corpus",
+    "hindi-text-short-and-large-summarization-corpus",
+    "indic-glue",
+    "samanantar",
+    "oldnewspapershindi",
+    "oscar",
+    "hindi-wikipedia-articles-172k",
 ]
 
 dataset = load_and_concatenate(datasets_list, print_test_row=True)
