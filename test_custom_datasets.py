@@ -180,7 +180,7 @@ DATASET_DICT = {
         "path": base_path + "/datasets/hindi-wikipedia-articles-172k",
         "split_names": ["train"],
         "cols_to_concatenate": ["text"],
-        "cols_to_remove": ["id", "text"],
+        "cols_to_remove": ["id"],
         "configuration": None,
         "preprocess_fn": preprocess_hindi_wiki_articles_172k
     },
