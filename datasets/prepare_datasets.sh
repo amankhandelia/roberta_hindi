@@ -9,3 +9,6 @@ unzip oldnewspapershindi.zip -d oldnewspapershindi/
 
 kaggle datasets download disisbig/hindi-text-short-and-large-summarization-corpus
 unzip hindi-text-short-and-large-summarization-corpus.zip -d hindi-text-short-and-large-summarization-corpus/
+
+kaggle datasets download prateekagrawal1405/hindi-wikipedia-articles-172k-csv
+unzip hindi-wikipedia-articles-172k-csv.zip -d hindi-wikipedia-articles-172k/

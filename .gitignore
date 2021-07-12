@@ -7,3 +7,4 @@ train.hi
 .ipynb_checkpoints/
 full_text_results.csv
 targeted_text_results.csv
+venv
