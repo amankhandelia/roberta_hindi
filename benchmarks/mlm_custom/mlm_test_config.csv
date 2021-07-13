@@ -1,0 +1,9 @@
+model_name,display_name,revision,from_flax
+"flax-community/roberta-pretraining-hindi","","",True
+"flax-community/roberta-pretraining-hindi","mc4-epoch2","a1235b3c276d2391ee0aca9d79e1deb276f6f0b3",True
+"flax-community/roberta-pretraining-hindi","newspaper-oscar-noisy","730b02bcb4ceb672e1a724fdaa42a7bc16926081",True
+"flax-community/roberta-pretraining-hindi","oscar+kaggle","55997de8ad4de1f37741f3c1cfbd27795f03c981",True
+"mrm8488/HindiBERTa","","",False
+"ai4bharat/indic-bert","","",False
+"neuralspace-reverie/indic-transformers-hi-bert","","",False
+"surajp/RoBERTa-hindi-guj-san","","",False
