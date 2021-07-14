@@ -3,6 +3,8 @@ import numpy as np
 from transformers import AutoTokenizer, RobertaModel, AutoModel, AutoModelForMaskedLM
 from transformers import pipeline
 import os
+import json
+
 
 class MLMTest():
 
@@ -44,8 +46,14 @@ class MLMTest():
     def _compute_acc(self, results):
         ctr = 0
         for row in results:
-            if row["prediction"] == row["true_output"]:
-                ctr+=1
+            try:
+                z = json.loads(row["true_output"])
+                if isinstance(z, list):
+                    if row["prediction"] in z:
+                        ctr+=1
+            except:
+                if row["prediction"] == row["true_output"]:
+                    ctr+=1
 
         return float(ctr/len(results))
 
