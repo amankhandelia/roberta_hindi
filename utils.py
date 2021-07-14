@@ -1,4 +1,4 @@
-import pandas as padding
+import pandas as pd
 from functools import partial
 from datasets.dataset_dict import DatasetDict
 
