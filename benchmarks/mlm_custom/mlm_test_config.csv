@@ -1,5 +1,5 @@
 model_name,display_name,revision,from_flax,use_fast,add_prefix_space
-flax-community/roberta-hindi,,,TRUE,TRUE,TRUE
+flax-community/roberta-pretraining-hindi,,,TRUE,TRUE,TRUE
 mrm8488/HindiBERTa,,,FALSE,TRUE,TRUE
 ai4bharat/indic-bert,,,FALSE,FALSE,FALSE
 neuralspace-reverie/indic-transformers-hi-bert,,,FALSE,TRUE,TRUE
