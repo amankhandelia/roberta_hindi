@@ -29,7 +29,6 @@ Note: We are still in the process on cleaning up some colab notebooks and will c
 
 ## Example code to use our Model for Mask Filling Task
 ```python
-```python
 >>> from transformers import pipeline
 >>> unmasker = pipeline('fill-mask', model='flax-community/roberta-hindi')
 >>> unmasker("हम आपके सुखद <mask> की कामना करते हैं")
